@@ -1,1 +1,190 @@
+--!strict
 
+local Data = {}
+
+-- =========================================================
+-- GLOBAL SETTINGS
+-- =========================================================
+
+Data.MAX_TIER = 10
+
+-- Chest spawn timing (controls reroll speed)
+Data.CHEST_SPAWN_INTERVAL = 1 -- seconds
+
+-- =========================================================
+-- TIER DATA (CORE ECONOMY)
+-- =========================================================
+
+-- Income per second per sword tier
+Data.TierIncome = {
+	[1] = 100,
+	[2] = 250,
+	[3] = 600,
+	[4] = 1500,
+	[5] = 4000,
+	[6] = 10000,
+	[7] = 25000,
+	[8] = 60000,
+	[9] = 150000,
+	[10] = 400000,
+}
+
+-- Base chest cost (before aura multiplier)
+Data.ChestCost = {
+	[1] = 0,
+	[2] = 5000,
+	[3] = 20000,
+	[4] = 80000,
+	[5] = 300000,
+	[6] = 1000000,
+	[7] = 4000000,
+	[8] = 15000000,
+	[9] = 60000000,
+	[10] = 250000000,
+}
+
+-- =========================================================
+-- CHEST NAME → TIER
+-- =========================================================
+
+Data.ChestTiers = {
+	WoodChest      = 1,
+	IronChest      = 2,
+	SteelChest     = 3,
+	BlazeChest     = 4,
+	CelestialChest = 5,
+	ArcaneChest    = 6,
+	ToxicChest     = 7,
+	HeavenlyChest  = 8,
+	VoidChest      = 9,
+	InfinityChest  = 10,
+}
+
+-- =========================================================
+-- DRIFT SYSTEM (TIER ROLLING)
+-- =========================================================
+
+-- Relative weights (no wildcard anymore, strictly ±2)
+Data.DriftWeights = {
+	[0]  = 70,
+	[-1] = 12,
+	[1]  = 12,
+	[-2] = 3,
+	[2]  = 3,
+}
+
+-- =========================================================
+-- AURA SYSTEM (CHEST-LEVEL)
+-- =========================================================
+
+-- Chance that a chest has NO aura
+Data.AURA_NONE_CHANCE = 0.50
+
+-- Aura roll weights
+Data.AuraWeights = {
+	Ember       = 35,
+	Golden      = 25,
+	Diamond     = 18,
+	Lightning   = 12,
+	Blood       = 6,
+	Divine      = 3,
+	Corrupt     = 0.8,
+	Singularity = 0.2,
+}
+
+-- Aura effects (income multiplier)
+Data.AuraMultipliers = {
+	Ember       = 1.15,
+	Golden      = 1.3,
+	Diamond     = 1.5,
+	Lightning   = 1.75,
+	Blood       = 2.1,
+	Divine      = 2.6,
+	Corrupt     = 3.2,
+	Singularity = 4.0,
+}
+
+-- Aura cost scaling (VERY IMPORTANT)
+Data.AuraCostMultiplier = {
+	Ember       = 1.2,
+	Golden      = 1.5,
+	Diamond     = 2.0,
+	Lightning   = 3.0,
+	Blood       = 5.0,
+	Divine      = 8.0,
+	Corrupt     = 15.0,
+	Singularity = 30.0,
+}
+
+-- =========================================================
+-- SWORDS (4 PER TIER)
+-- Replace names with your actual model names
+-- =========================================================
+
+Data.SwordsByTier = {
+	[1] = {"RustBlade", "WoodenSword", "CrackedEdge", "OldKnife"},
+	[2] = {"IronBlade", "ShortSword", "GuardSword", "BalancedEdge"},
+	[3] = {"SteelSword", "KnightBlade", "LongEdge", "RefinedSteel"},
+	[4] = {"BlazeSword", "FlameEdge", "HeatBlade", "BurningSteel"},
+	[5] = {"CelestialBlade", "StarSword", "SkyEdge", "RadiantBlade"},
+	[6] = {"ArcaneSword", "ManaBlade", "MysticEdge", "SpellSword"},
+	[7] = {"ToxicBlade", "VenomEdge", "PlagueSword", "CorrosionBlade"},
+	[8] = {"HeavenlySword", "DivineEdge", "LightBlade", "SacredSword"},
+	[9] = {"VoidBlade", "AbyssEdge", "DarkMatterSword", "NullBlade"},
+	[10] = {"InfinityBlade", "EternalEdge", "Godslayer", "FinalEdge"},
+}
+
+-- =========================================================
+-- SLOT MULTIPLIERS
+-- =========================================================
+
+Data.SlotMultipliers = {
+	Normal = 1.0,
+	Boost1 = 1.3,
+	Boost2 = 1.6,
+	Boost3 = 2.0,
+}
+
+-- =========================================================
+-- CHEST OPEN TIMES (SECONDS)
+-- =========================================================
+
+Data.ChestOpenTime = {
+	[1] = 2,
+	[2] = 3,
+	[3] = 4,
+	[4] = 5,
+	[5] = 6,
+	[6] = 8,
+	[7] = 10,
+	[8] = 12,
+	[9] = 14,
+	[10] = 16,
+}
+
+-- =========================================================
+-- HELPER FUNCTIONS
+-- =========================================================
+
+function Data.GetChestCost(chestTier: number, aura: string?): number
+	local base = Data.ChestCost[chestTier] or 0
+	if aura and Data.AuraCostMultiplier[aura] then
+		return math.floor(base * Data.AuraCostMultiplier[aura])
+	end
+	return base
+end
+
+function Data.GetSwordIncome(tier: number, aura: string?, slotMultiplier: number?): number
+	local base = Data.TierIncome[tier] or 0
+
+	local auraMult = 1
+	if aura and Data.AuraMultipliers[aura] then
+		auraMult = Data.AuraMultipliers[aura]
+	end
+
+	local slotMult = slotMultiplier or 1
+
+	return base * auraMult * slotMult
+end
+
+return Data
