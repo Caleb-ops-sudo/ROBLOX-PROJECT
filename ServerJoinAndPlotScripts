@@ -1,5 +1,5 @@
 
---MODULE SCRIPT
+//MODULE SCRIPT
 
 local PlotManager = {}
 
@@ -77,7 +77,7 @@ end
 
 return PlotManager
 
---SERVER SCRIPT
+//SERVER SCRIPT
 
 print("SCRIPT IS RUNNING")
 local Players = game:GetService("Players")
