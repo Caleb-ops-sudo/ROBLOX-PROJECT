@@ -1,1 +1,76 @@
+local PlotManager = {}
+
+local PlotsFolder = workspace:WaitForChild("Plots")
+local plotAssigned = Instance.new("BindableEvent")
+
+-- 🔥 RESET ALL PLOTS ON SERVER START
+for _, plot in ipairs(PlotsFolder:GetChildren()) do
+	local owner = plot:FindFirstChild("Owner")
+	if owner then
+		owner.Value = nil
+	end
+end
+
+local function getPlots()
+	return PlotsFolder:GetChildren()
+end
+
+function PlotManager:GetAvailablePlot()
+	for _, plot in ipairs(getPlots()) do
+		local owner = plot:FindFirstChild("Owner")
+		if owner and owner.Value == nil then
+			return plot
+		end
+	end
+	return nil
+end
+
+function PlotManager:AssignPlot(player)
+	local plot = self:GetAvailablePlot()
+	if not plot then return nil end
+
+	local owner = plot:FindFirstChild("Owner")
+	if owner then
+		owner.Value = player
+	end
+
+	-- Optional sign update
+	local sign = plot:FindFirstChild("OwnershipSign", true)
+	if sign and sign:FindFirstChild("SurfaceGui") then
+		local gui = sign.SurfaceGui
+		local label = gui:FindFirstChild("NameLabel")
+		if label then
+			label.Text = player.Name .. "'s Plot"
+		end
+	end
+
+	plotAssigned:Fire(player)
+	return plot
+end
+
+function PlotManager:GetPlot(player)
+	for _, plot in ipairs(getPlots()) do
+		local owner = plot:FindFirstChild("Owner")
+		if owner and owner.Value == player then
+			return plot
+		end
+	end
+	return nil
+end
+
+function PlotManager:GetSpawnCFrame(player)
+	local plot = self:GetPlot(player)
+	if plot then
+		local spawn = plot:FindFirstChild("Spawn", true)
+
+		if spawn and spawn:IsA("BasePart") then
+			return spawn.CFrame + Vector3.new(0, 3, 0)
+		else
+			warn("Spawn missing or invalid in plot:", plot.Name)
+		end
+	end
+	return nil
+end
+
+return PlotManager
 
