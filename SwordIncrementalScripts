@@ -1,9 +1,12 @@
+
+--MODULE SCRIPT
+
 local PlotManager = {}
 
 local PlotsFolder = workspace:WaitForChild("Plots")
 local plotAssigned = Instance.new("BindableEvent")
 
--- 🔥 RESET ALL PLOTS ON SERVER START
+--  RESET ALL PLOTS ON SERVER START
 for _, plot in ipairs(PlotsFolder:GetChildren()) do
 	local owner = plot:FindFirstChild("Owner")
 	if owner then
@@ -73,4 +76,39 @@ function PlotManager:GetSpawnCFrame(player)
 end
 
 return PlotManager
+
+--SERVER SCRIPT
+
+print("SCRIPT IS RUNNING")
+local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+local PlotManager = require(ServerScriptService:WaitForChild("PlotManager"))
+
+Players.PlayerAdded:Connect(function(plr)
+	print("Player joined:", plr.Name)
+
+	local plot = PlotManager:AssignPlot(plr)
+	print("Assigned plot:", plot)
+
+	if not plot then
+		warn("No available plots for player " .. plr.Name)
+		return
+	end
+
+	plr.CharacterAdded:Connect(function(char)
+		print("Character spawned")
+
+		local spawnCFrame = PlotManager:GetSpawnCFrame(plr)
+		print("Spawn CFrame:", spawnCFrame)
+
+		if spawnCFrame then
+			task.wait() -- helps avoid timing bugs
+			char:PivotTo(spawnCFrame)
+		else
+			warn("No spawn found for " .. plr.Name)
+		end
+	end)
+end)
+
 
