@@ -1,0 +1,118 @@
+🧠 CORE GAME LOOP (What the player does)
+
+1. Chest appears (from conveyor)
+
+Has:
+Tier (1–10)
+Aura (or none)
+Price
+
+2. Player decision
+
+Skip → new chest rolls
+Buy → chest is taken
+
+3. Chest is opened (via slot system)
+
+Becomes a sword after a delay
+Sword has:
+Tier (based on chest RNG drift)
+Aura (from chest)
+
+4. Sword goes into a display slot
+
+Generates passive income
+
+5. Income accumulates
+
+NOT instantly given
+Stored as Pending Money
+
+6. Player collects money
+
+Walks over CashCollector
+Receives all stored income
+
+7. Repeat loop
+
+Upgrade, replace swords, optimize slots
+⚙️ YOUR SYSTEM ARCHITECTURE
+1. 📦 DataModule (your backbone)
+
+Centralized all balancing values:
+
+Tier income scaling (starts at $100/sec → up to $400k/sec)
+Chest costs (scaled to match progression)
+Aura multipliers (income boost)
+Aura cost multipliers (price scaling)
+Sword lists (4 per tier)
+Slot multipliers (1.0 → 2.0)
+
+👉 This lets you rebalance the entire game in one place.
+
+2. 🎲 ChestRoller (RNG system)
+
+Handles:
+
+Sword tier rolling using drift system
+70% same tier
+±1 and ±2 weighted
+Aura rolling (independent)
+
+You refined:
+
+Removed extreme wildcard jumps
+Kept outcomes controlled and fair
+3. 💰 Money System
+Leaderstats
+Stores player money (NumberValue)
+4. 📈 Income System (Passive Engine)
+
+Runs every second:
+
+Loops through player slots
+Calculates income per sword:
+Money is NOT given instantly, it is stored in a CashCollector
+
+5. 🏦 Collection System (CashCollector)
+Physical part in the world
+Player walks over it
+7. 📦 Chest Spawn System (in progress)
+Each player has 1 active chest
+Chest contains:
+Tier
+Aura
+Player can:
+
+Skip → reroll
+Buy → consume + generate next
+⚖️ ECONOMY DESIGN (Very Important)
+Tier Scaling
+~2.5x per tier
+Keeps progression smooth
+Chest Pricing
+Higher scaling (~3–4x)
+Prevents skipping progression
+Aura Design
+Rare AND expensive
+Multipliers capped (~4x max)
+Key Rule:
+
+Auras enhance progression, they don’t replace tiers
+
+🎯 Design Decision
+✅ One central collector
+Not per-slot collection
+Cleaner, scalable, better feel
+✅ Chest aura system (before purchase)
+Adds excitement at decision stage
+Enables “jackpot” moments
+✅ Skip mechanic
+Prevents overflow
+Gives player control
+Enables reroll gameplay
+✅ Big numbers ($100 base)
+Same scaling, better player satisfaction
+✅ Controlled RNG (no extreme spikes)
+Prevents early-game breaks
+Keeps progression meaningful
