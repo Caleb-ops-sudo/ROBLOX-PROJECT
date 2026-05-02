@@ -1,0 +1,55 @@
+Session Summary — Chest Spawn System & Visual Themes
+Chest Conveyer Spawn System ✅
+Built the full chest spawning loop on the conveyer:
+
+ChestRoller (ModuleScript) in ServerScriptService — RNG data module with chest tiers, aura weights, costs, and helper functions
+ChestSpawner (Script) in ServerScriptService — handles the spawn → tween-in → wait → tween-out → respawn cycle
+Chests spawn at ChestSpawn, glide smoothly along the X-axis, and stop dead-center on the conveyer
+Uses each chest template's natural rotation + a 90° clockwise turn so the front faces the player
+Auto-detects the conveyer belt surface via raycast; chest base hovers exactly 0.2 studs above it
+Per-chest pivot Y calculation so different-sized chests all hover correctly
+
+Skip & Grab Mechanics ✅
+
+SkipChestBindable (BindableEvent) in ReplicatedStorage for server-to-server skip signals
+ChestSkipServer (Script) on Plots.Plot1.ChestClick.ChestButton with a ClickDetector — clicking the button skips the current chest
+ProximityPrompt on each spawned chest (key: E, "Grab Chest") — currently logs the grab to console; full grab→inventory logic still TODO
+PrimaryPart property set on all 10 chest models in SwordPerChest
+
+Chest Rarity Visual Themes ✅
+Built 10 themed ChestGUI parts (Wood, Iron, Steel, Blaze, Celestial, Arcane, Toxic, Heavenly, Void, Infinity):
+
+Each with rarity-appropriate colors, fonts, and UIStroke outlines
+Steel uses a silver gradient, Infinity uses a full rainbow gradient
+Glow ImageLabel behind text approximates the design's drop-shadow effect
+
+Aura Visual Themes ✅
+Built 8 themed AuraGUI parts (Ember, Golden, Diamond, Lightning, Blood, Divine, Corrupt, Singularity):
+
+Each with themed gradients, strokes, and glow layers
+Singularity uses a black/white scrolling gradient with no stroke
+Infinity uses a rainbow scrolling gradient with no stroke
+
+Idle Animation System ✅
+
+ChestAuraAnimator (LocalScript) in StarterPlayer.StarterPlayerScripts
+Runs per-client, recursively scans workspace, animates every chest/aura GUI it finds
+Per-rarity animation profiles: float amplitude, scale pulse, glow pulse, opacity flicker (Blaze), opacity pulse (Celestial/Golden), jitter (Toxic), jitter burst (Lightning), tilt (Corrupt), color shift (Corrupt)
+Right-to-left gradient scrolling for Steel, Infinity, Lightning, Blood, Divine, Singularity
+Doubled gradients (two cycles per stripe) eliminate visible seams when offset wraps
+
+GUI Attachment ✅
+
+ChestSpawner clones the matching ChestGUI template above each spawned chest
+If an aura rolls, also clones the matching AuraGUI floating higher above
+Both welded to chest's PrimaryPart so they follow the tween smoothly
+Final positioning: ChestGUI at 3.5 studs above chest top, AuraGUI at 6.0 studs above (2.5 stud gap)
+Both rotated 90° clockwise on Y-axis to face the player along the conveyer
+TemplateName attribute stamped on clones so animator picks them up
+
+Outstanding TODOs (for next session)
+
+Real tier progression logic (currently uses math.random(1,10) — drift weights from RNG module not yet applied)
+Buy logic on grab: deduct cost, hand chest to player, validate funds
+Investigate MoneyService error in Plots.Plot1.CashCollector.CollectorScript
+Aura visual effects in 3D space (particles around chest itself, separate from text GUI)
